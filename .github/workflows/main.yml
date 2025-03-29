@@ -1,9 +1,9 @@
-name: vprofile actions
+name: vision actions
 on: workflow_dispatch
 env:
   AWS_REGION: us-east-2
-  ECR_REPOSITORY: vprofileapp
-  EKS_CLUSTER: vprofile-eks
+  ECR_REPOSITORY: visionapp
+  EKS_CLUSTER: vision-eks
 
 jobs:
   Testing:
@@ -42,7 +42,7 @@ jobs:
            -Dsonar.jacoco.reportsPath=target/jacoco.exec 
            -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
            -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/  
-
+ 
       # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
