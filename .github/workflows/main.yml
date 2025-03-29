@@ -1,4 +1,4 @@
-name: Vision Deployment Pipeline
+name: vision actions
 on: workflow_dispatch
 env:
   AWS_REGION: us-east-2
@@ -18,35 +18,41 @@ jobs:
       - name: Checkstyle
         run: mvn checkstyle:checkstyle
 
+      # Setup java 11 to be default (sonar-scanner requirement as of 5.x)
       - name: Set Java 11
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '11'
+         distribution: 'temurin' # See 'Supported distributions' for available options
+         java-version: '11'
 
+      # Setup sonar-scanner
       - name: Setup SonarQube
         uses: warchant/setup-sonar-scanner@v7
 
-      - name: SonarQube Scan
-        run: |
-          sonar-scanner \
-            -Dsonar.host.url=${{ secrets.SONAR_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-            -Dsonar.sources=src/ \
-            -Dsonar.junit.reportsPath=target/surefire-reports/ \
-            -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-            -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
-            -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/
 
+      # Run sonar-scanner
+      - name: SonarQube Scan
+        run: sonar-scanner
+           -Dsonar.host.url=${{ secrets.SONAR_URL }}
+           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+           -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+           -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+           -Dsonar.sources=src/
+           -Dsonar.junit.reportsPath=target/surefire-reports/ 
+           -Dsonar.jacoco.reportsPath=target/jacoco.exec 
+           -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml
+           -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/  
+ 
+      # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
         uses: sonarsource/sonarqube-quality-gate-action@master
+        # Force to fail step after specific time.
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_URL }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }} #OPTIONAL
+       
 
   BUILD_AND_PUBLISH:
     needs: Testing
@@ -55,28 +61,20 @@ jobs:
       - name: Code checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+      - name: Build & Upload image to ECR
+        uses: appleboy/docker-ecr-action@master
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+         access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         registry: ${{ secrets.REGISTRY }}
+         repo: ${{ env.ECR_REPOSITORY }}
+         region: ${{ env.AWS_REGION }}
+         tags: latest,${{ github.run_number }}
+         daemon_off: false
+         dockerfile: ./Dockerfile
+         context: ./
 
-      - name: Login to ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build & Push to ECR
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ secrets.REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
-            ${{ secrets.REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.run_number }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
+         
   DeployToEKS:
     needs: BUILD_AND_PUBLISH
     runs-on: ubuntu-latest
@@ -85,7 +83,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -94,22 +92,34 @@ jobs:
       - name: Get Kube config file
         run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER }}
 
+      - name: Print config file
+        run: cat ~/.kube/config
+
+      #- name: Login to ECR
+      #  run: kubectl create secret docker-registry regcred --docker-server=${{ secrets.REGISTRY }} --docker-username=AWS  --docker-password=$(aws ecr get-login-password) 
+      
       - name: Create/Update ECR registry secret
         run: |
           kubectl create secret docker-registry regcred \
-            --docker-server=${{ secrets.REGISTRY }} \
-            --docker-username=AWS \
-            --docker-password=$(aws ecr get-login-password) \
-            --dry-run=client -o yaml | kubectl apply -f -
+          --docker-server=${{ secrets.REGISTRY }} \
+          --docker-username=AWS \
+          --docker-password=$(aws ecr get-login-password) \
+          --dry-run=client -o yaml | kubectl apply -f - 
 
-      - name: Deploy Helm Chart
+
+      - name: Deploy Helm
         uses: bitovi/github-actions-deploy-eks-helm@v1.2.8
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
           cluster-name: ${{ env.EKS_CLUSTER }}
+          #config-files: .github/values/dev.yaml
           chart-path: helm/visioncharts
           namespace: default
           values: appimage=${{ secrets.REGISTRY }}/${{ env.ECR_REPOSITORY }},apptag=${{ github.run_number }}
-          name: vision-stack
+          name: vision-stack    
+
+# will workflow work during manully: workflow_dispatch
+# .github/main.yml    # Must save as this
+# we need to run the work flow manully
