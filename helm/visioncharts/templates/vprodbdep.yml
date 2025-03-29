@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: vprodb
-        image: kalai25/devdb
+        image: vprofile/vprofiledb 
         ports:
         - name: vprodb-port
           containerPort: 3306
@@ -29,4 +29,3 @@ spec:
 #        env:
 #         - name: MYSQL_ROOT_PASSWORD
 #           value: "vprodbpass"
-
