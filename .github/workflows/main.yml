@@ -55,9 +55,9 @@ jobs:
        
 
 BUILD_AND_PUBLISH:   
-    needs: Testing
-    runs-on: ubuntu-latest
-    steps:
+needs: Testing
+runs-on: ubuntu-latest
+steps:
       - name: Code checkout
         uses: actions/checkout@v4
 
@@ -73,7 +73,7 @@ BUILD_AND_PUBLISH:
          daemon_off: false
          dockerfile: ./Dockerfile
          context: ./
-
+          
 # will workflow work during manully: workflow_dispatch
 # .github/main.yml    # Must save as this
 # we need to run the work flow manully
