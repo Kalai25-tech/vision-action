@@ -2,8 +2,8 @@ name: vision actions
 on: workflow_dispatch
 env:
   AWS_REGION: us-east-2
-  ECR_REPOSITORY: vision-reg
-  EKS_CLUSTER: vision-eks
+  ECR_REPOSITORY: image-reg
+  EKS_CLUSTER: vision-eks1
 
 jobs:
   Testing:
@@ -44,14 +44,14 @@ jobs:
            -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/  
  
       # Check the Quality Gate status.
-      #- name: SonarQube Quality Gate check
-      #  id: sonarqube-quality-gate-check
-      #  uses: sonarsource/sonarqube-quality-gate-action@master
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
         # Force to fail step after specific time.
-      #  timeout-minutes: 5
-      #  env:
-      #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #    SONAR_HOST_URL: ${{ secrets.SONAR_URL }} #OPTIONAL
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_URL }} #OPTIONAL
        
 
   BUILD_AND_PUBLISH:
