@@ -1,4 +1,4 @@
-name: vision actions12
+name: vision actions
 on: workflow_dispatch
 env:
   AWS_REGION: us-west-1
