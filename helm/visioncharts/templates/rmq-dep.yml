@@ -13,8 +13,6 @@ spec:
     metadata:
       labels:
         app: vpromq01
-      annotations:
-        redeploy-timestamp: "{{ now | quote }}"
     spec:
       containers:
       - name: vpromq01
@@ -23,10 +21,11 @@ spec:
         - name: vpromq01-port
           containerPort: 15672
         env: 
-        - name: RABBITMQ_DEFAULT_PASS
-          valueFrom:
-            secretKeyRef:
-              name: app-secret
-              key: rmq-pass
-        - name: RABBITMQ_DEFAULT_USER
-          value: "guest"
+         - name: RABBITMQ_DEFAULT_PASS
+           valueFrom:
+             secretKeyRef:
+               name: app-secret
+               key: rmq-pass
+         - name: RABBITMQ_DEFAULT_USER
+           value: "guest"
+
