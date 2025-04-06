@@ -92,7 +92,3 @@ jobs:
           namespace: default
           values: appimage=${{ secrets.REGISTRY }}/${{ env.ECR_REPOSITORY }},apptag=${{ github.run_number }}
           name: vision-stack    
-
-# will workflow work during manully: workflow_dispatch
-# .github/main.yml    # Must save as this
-# we need to run the work flow manully
