@@ -1,7 +1,7 @@
 name: vision actions12
 on: workflow_dispatch
 env:
-  AWS_REGION: us-east-2
+  AWS_REGION: us-west-1
   ECR_REPOSITORY: image-reg
   EKS_CLUSTER: vision-eks1
 
