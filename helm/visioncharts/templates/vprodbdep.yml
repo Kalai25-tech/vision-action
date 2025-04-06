@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: vprodb
-        image: kalai25/devdb
+        image: vprofile/vprofiledb 
         ports:
         - name: vprodb-port
           containerPort: 3306
