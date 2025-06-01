@@ -46,6 +46,7 @@ jobs:
          daemon_off: false
          dockerfile: ./Dockerfile
          context: ./
+         custom_dns: "8.8.8.8"
 
          
   DeployToEKS:
@@ -70,7 +71,7 @@ jobs:
 
       #- name: Login to ECR
       #  run: kubectl create secret docker-registry regcred --docker-server=${{ secrets.REGISTRY }} --docker-username=AWS  --docker-password=$(aws ecr get-login-password) 
-      
+       
       - name: Create/Update ECR registry secret
         run: |
           kubectl create secret docker-registry regcred \
