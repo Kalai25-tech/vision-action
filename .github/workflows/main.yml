@@ -26,6 +26,10 @@ jobs:
          distribution: 'temurin' # See 'Supported distributions' for available options
          java-version: '11'
 
+      # Setup sonar-scanner\
+      - name: Setup SonarQube\
+        uses: warchant/setup-sonar-scanner@v7
+
       # Sonnar Scanner Step   
       - name: SonarQube Scan
         run: |
