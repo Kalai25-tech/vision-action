@@ -24,7 +24,7 @@ jobs:
         run: mvn test
 
       - name: Checkstyle
-        run: mvn checkstyle:check
+        run: mvn checkstyle:checkstyle
 
       - name: Setup SonarQube
         uses: warchant/setup-sonar-scanner@v7
