@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: vision-reg
+  ECR_REPOSITORY: image_repo
   EKS_CLUSTER: vision-eks1
 
 jobs:
