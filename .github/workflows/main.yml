@@ -86,3 +86,5 @@ jobs:
       - name: Print config file
         run: cat ~/.kube/config
 
+      - name: User access check
+        run: kubectl get nodes
