@@ -20,50 +20,50 @@ jobs:
           distribution: temurin
           java-version: '11'
 
-#      - name: Maven test
-#        run: mvn test
-#
-#      - name: Checkstyle
-#        run: mvn checkstyle:checkstyle
-#
-#      - name: Setup SonarQube
-#        uses: warchant/setup-sonar-scanner@v7
-#
-#      - name: SonarQube Scan
-#        run: |
-#          sonar-scanner \
-#            -Dsonar.host.url=${{ secrets.SONAR_URL }} \
-#            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
-#            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-#            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-#            -Dsonar.sources=src/ \
-#            -Dsonar.junit.reportsPath=target/surefire-reports/ \
-#            -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-#            -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
-#            -Dsonar.java.binaries=target/classes
-#
-#
-#  BUILD_AND_PUBLISH:
-#    needs: Testing
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Code checkout
-#        uses: actions/checkout@v4
-#
-#      - name: Build & Upload image to ECR
-#        uses: appleboy/docker-ecr-action@master
-#        with:
-#         access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#         registry: ${{ secrets.REGISTRY }}
-#         repo: ${{ env.ECR_REPOSITORY }}
-#         region: ${{ env.AWS_REGION }}
-#         tags: latest,${{ github.run_number }}
-#         daemon_off: false
-#         dockerfile: ./Dockerfile
-#         context: ./
-#         custom_dns: "8.8.8.8"
-#
+      - name: Maven test
+        run: mvn test
+
+      - name: Checkstyle
+        run: mvn checkstyle:checkstyle
+
+      - name: Setup SonarQube
+        uses: warchant/setup-sonar-scanner@v7
+
+      - name: SonarQube Scan
+        run: |
+          sonar-scanner \
+            -Dsonar.host.url=${{ secrets.SONAR_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+            -Dsonar.sources=src/ \
+            -Dsonar.junit.reportsPath=target/surefire-reports/ \
+            -Dsonar.jacoco.reportsPath=target/jacoco.exec \
+            -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
+            -Dsonar.java.binaries=target/classes
+
+
+  BUILD_AND_PUBLISH:
+    needs: Testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+
+      - name: Build & Upload image to ECR
+        uses: appleboy/docker-ecr-action@master
+        with:
+         access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+         secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+         registry: ${{ secrets.REGISTRY }}
+         repo: ${{ env.ECR_REPOSITORY }}
+         region: ${{ env.AWS_REGION }}
+         tags: latest,${{ github.run_number }}
+         daemon_off: false
+         dockerfile: ./Dockerfile
+         context: ./
+         custom_dns: "8.8.8.8"
+
          
         
   DeployToEKS:
